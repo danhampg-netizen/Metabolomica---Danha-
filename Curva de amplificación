@@ -1,0 +1,36 @@
+
+# Nombre: Danha Michell Pineda Guevara 
+# Ejercicio curvas de amplificación 
+
+install.packages("pacman")
+#Pacman llama a otros paquetes y si no están los instala
+
+library("pacman")
+
+p_load("vroom",
+       "dplyr",
+       "ggplot2")
+
+Garu <- vroom(file="https://raw.githubusercontent.com/ManuelLaraMVZ/resultados_PCR_practica/refs/heads/main/Amplif_grupo1_17022025.csv")
+
+head(Garu)
+
+Datos <- Garu %>% # %>% Significa que a la base de datos le haremos lo siguiente
+  select(1,2)
+
+Datos
+
+Grafica <- ggplot (Datos,
+                   mapping = aes(x=Cycle,
+                                 y= A1))+
+  geom_line(color = "#073E9C",
+            size = 0.8)+
+  labs(x ="Ciclos",
+       y ="Florescencia",
+       title = "Gráfica de amplificación RT-qPCR",
+       subtitle = "Muestra A1",
+       caption = "Diseño: Danha Michell")+
+  geom_point(color = "#020A17")+
+  theme_classic()
+
+Grafica
