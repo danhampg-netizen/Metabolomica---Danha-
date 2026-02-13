@@ -1,0 +1,29 @@
+# Nombre: Danha Michell Pineda Guevara 
+# Ejercicio curvas de amplificación 
+
+install.packages("pacman")
+#Pacman llama a otros paquetes y si no están los instala
+
+library("pacman")
+
+p_load("vroom",
+       "dplyr",
+       "ggplot2")
+
+Datos_PCR <- 
+  vroom(file = "https://raw.githubusercontent.com/ManuelLaraMVZ/resultados_PCR_practica/refs/heads/main/Genes.csv")
+Datos_PCR
+
+Gen_ref <- Datos_PCR %>% 
+  filter(Gen == "B-actina")
+Gen_ref
+
+Gen_int <- Datos_PCR %>% 
+  filter(Gen!="B-actina")
+Gen_int
+
+DCT <- Gen_int %>% 
+  mutate(DCTC1 = C1 - Gen_ref$C1,
+         DCTC2 = C2 - Gen_ref$C2,) #Sirve para crear nuevas columnas
+
+DCT
