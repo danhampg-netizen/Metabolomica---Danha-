@@ -1,0 +1,93 @@
+---
+title: "Ejercicio PCR"
+author: "Danha Pineda"
+date: "2026-02-18"
+output: html_document
+---
+
+Ejercicio R de PCR 
+Los chunk los obtengo con: Ctrl+Alt+I
+Paquetería
+```{r}
+library("pacman")
+
+p_load("vroom",
+       "dplyr",
+       "ggplot2")
+```
+
+Llamar base de datos
+```{r}
+Datos_PCR <- 
+  vroom(file = "https://raw.githubusercontent.com/ManuelLaraMVZ/resultados_PCR_practica/refs/heads/main/Genes.csv")
+
+Datos_PCR
+```
+Aislar gen de referencia 
+```{r}
+Gen_ref <- Datos_PCR %>% 
+  filter(Gen == "B-actina")
+Gen_ref
+```
+Aislar gen de interés
+```{r}
+Gen_int <- Datos_PCR %>% 
+  filter(Gen!="B-actina")
+Gen_int
+```
+Analisis 
+```{r}
+DCT <- Gen_int %>% 
+  mutate(DCTC1 = C1 - Gen_ref$C1,
+         DCTC2 = C2 - Gen_ref$C2,
+         DCTC3 = C3 - Gen_ref$C3,
+         DCTT1 = T1 - Gen_ref$T1,
+         DCTT2 = T2 - Gen_ref$T2,
+         DCTT3 = T3 - Gen_ref$T3) %>% 
+  mutate(DosDCT_C1 = 2^-DCTC1,
+         DosDCT_C2 = 2^-DCTC2,
+         DosDCT_C3 = 2^-DCTC3,
+         DosDCT_T1 = 2^-DCTT1,
+         DosDCT_T2 = 2^-DCTT2,
+         DosDCT_T3 = 2^-DCTT3,) %>% 
+  mutate(DosDCT_Cx_prom = (DosDCT_C1+DosDCT_C2+DosDCT_C3/3),
+         DosDCT_Tx_prom = (DosDCT_T1+DosDCT_T2+DosDCT_T3/3)) %>% 
+  mutate(DosDDCT = DosDCT_Tx_prom/DosDCT_Cx_prom) 
+  
+DCT
+```
+Selección de datos para graficar
+```{r}
+# Selección de columnas
+Datos_grafica <- DCT %>%
+  dplyr::select(Gen, DosDDCT)
+```
+
+Grafica
+```{r}
+Grafica_PCR <- ggplot(Datos_grafica,
+                      aes(x = Gen, y = DosDDCT, fill = Gen)) +
+  geom_col(width = 0.7, color = "black") +     # borde opcional para contraste
+  labs(
+    title = "Expresión relativa por gen",
+    subtitle = "Resultados de PCR en tiempo real (método ΔΔCt)",
+    x = "Gen",
+    y = "2^-ΔΔCt",
+    caption = "Fuente: DCT (procesamiento propio)"
+  ) +
+  # Paleta de colores (elige una; aquí uso 'Dark2' que da colores bien contrastados)
+  scale_fill_brewer(palette = "Dark2") +
+  # Fondo blanco
+  theme_classic(base_size = 12) +
+  # Ajustes estéticos
+  theme(
+    legend.position = "none",                # quita la leyenda (opcional)
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "gray30"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+Grafica_PCR
+```
